@@ -1,0 +1,6 @@
+{
+  "name": "Missão Algoritmo: Aventura Lógica & Matemática",
+  "description": "Jogo educativo interativo integrando Matemática (D19: Adição e Subtração), Língua Portuguesa (D12: Relações Lógico-Discursivas) e Computação (EF05CO04: Criação e Simulação de Algoritmos).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
