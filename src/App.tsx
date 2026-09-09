@@ -3,14 +3,15 @@ import { LEVELS } from './data/levels';
 import { CommandBlock, CommandType, Direction, Level, BackgroundThemeId } from './types';
 import { GridMap } from './components/GridMap';
 import { BlockWorkspace } from './components/BlockWorkspace';
-import { NarrativeCard } from './components/NarrativeCard';
-import { MathCalculatorPanel } from './components/MathCalculatorPanel';
 import { PedagogicalModal } from './components/PedagogicalModal';
 import { LevelSuccessModal } from './components/LevelSuccessModal';
 import { FreeSandboxMode } from './components/FreeSandboxMode';
 import { LevelTutorialModal } from './components/LevelTutorialModal';
 import { GameBackground } from './components/GameBackground';
 import { BackgroundSelectorModal } from './components/BackgroundSelectorModal';
+import { MissionsRoadmapModal } from './components/MissionsRoadmapModal';
+import { MissionSelectorBar } from './components/MissionSelectorBar';
+import { EducationalMissionPanel } from './components/EducationalMissionPanel';
 import { sound } from './utils/sound';
 import {
   Sparkles,
@@ -27,6 +28,7 @@ import {
   RotateCcw,
   HelpCircle,
   Palette,
+  Compass,
 } from 'lucide-react';
 
 export default function App() {
@@ -35,6 +37,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'adventure' | 'sandbox'>('adventure');
   const [isPedagogicalOpen, setIsPedagogicalOpen] = useState<boolean>(false);
   const [isTutorialOpen, setIsTutorialOpen] = useState<boolean>(false);
+  const [isRoadmapOpen, setIsRoadmapOpen] = useState<boolean>(false);
   const [isBgModalOpen, setIsBgModalOpen] = useState<boolean>(false);
   const [backgroundTheme, setBackgroundTheme] = useState<BackgroundThemeId>(() => {
     const saved = localStorage.getItem('missao_algoritmo_bg_theme');
@@ -476,70 +479,90 @@ export default function App() {
       <GameBackground theme={backgroundTheme} />
 
       {/* App Header */}
-      <header className="sticky top-0 z-40 bg-slate-950/80 border-b border-slate-800/80 backdrop-blur-md px-4 py-3">
+      <header className="sticky top-0 z-40 bg-slate-950/85 border-b border-slate-800/80 backdrop-blur-md px-3 sm:px-4 py-2.5">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           {/* Brand & Title */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-violet-600 p-0.5 shadow-lg shadow-cyan-500/20 flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-violet-600 p-0.5 shadow-md shadow-cyan-500/20 flex items-center justify-center">
               <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <Cpu className="w-5 h-5 text-cyan-400" />
+                <Cpu className="w-4 h-4 text-cyan-400" />
               </div>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-extrabold text-base sm:text-lg tracking-tight text-white">
+                <h1 className="font-extrabold text-sm sm:text-base tracking-tight text-white">
                   Missão Algoritmo
                 </h1>
                 <span className="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded-full border border-cyan-800/60 hidden sm:inline-block">
                   BNCC & SAEB
                 </span>
+                <span className="text-[11px] font-mono font-bold text-indigo-300 bg-indigo-950/80 px-2 py-0.5 rounded-md border border-indigo-800/60 hidden md:inline-block">
+                  Fase {currentLevel.id} de {LEVELS.length}
+                </span>
               </div>
-              <p className="text-xs text-slate-400 font-medium">
+              <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
                 Matemática D19 • Português D12 • Computação EF05CO04
               </p>
             </div>
           </div>
 
           {/* Star Counter & Navigation Tabs */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {/* Stars summary pill */}
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-amber-300">
+            <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-amber-300">
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
               <span>
                 {totalStarsEarned} / {LEVELS.length * 3}
               </span>
             </div>
 
-            <button
-              id="tab-adventure"
-              onClick={() => {
-                sound.playClick();
-                setActiveTab('adventure');
-              }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'adventure'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Trophy className="w-3.5 h-3.5" />
-              Fases ({LEVELS.length})
-            </button>
+            {/* Mode Switcher */}
+            <div className="flex items-center bg-slate-950 p-0.5 rounded-xl border border-slate-800">
+              <button
+                id="tab-adventure"
+                onClick={() => {
+                  sound.playClick();
+                  setActiveTab('adventure');
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'adventure'
+                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Trophy className="w-3 h-3" />
+                <span>Missões</span>
+              </button>
 
+              <button
+                id="tab-sandbox"
+                onClick={() => {
+                  sound.playClick();
+                  setActiveTab('sandbox');
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'sandbox'
+                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Sparkles className="w-3 h-3" />
+                <span className="hidden sm:inline">Laboratório</span>
+              </button>
+            </div>
+
+            {/* Roadmap Modal Button */}
             <button
-              id="tab-sandbox"
+              id="btn-open-roadmap-header"
               onClick={() => {
                 sound.playClick();
-                setActiveTab('sandbox');
+                setIsRoadmapOpen(true);
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'sandbox'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
-              }`}
+              className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-950/80 hover:bg-indigo-900/80 border border-indigo-700/60 text-indigo-300 hover:text-indigo-100 transition-all flex items-center gap-1.5"
+              title="Abrir o Mapa Completo das 17 Fases"
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              Laboratório Livre
+              <Compass className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden md:inline">Mapa de Missões</span>
             </button>
 
             {/* Pedagogical Guide Button */}
@@ -549,11 +572,10 @@ export default function App() {
                 sound.playClick();
                 setIsPedagogicalOpen(true);
               }}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-cyan-300 hover:text-cyan-200 transition-all flex items-center gap-1.5"
+              className="p-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-cyan-300 hover:text-cyan-200 transition-all"
               title="Ver Guia Pedagógico (D19, D12, EF05CO04)"
             >
-              <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden md:inline">Guia Pedagógico</span>
+              <BookOpen className="w-4 h-4 text-cyan-400" />
             </button>
 
             {/* Tutorial Button in Header */}
@@ -563,11 +585,10 @@ export default function App() {
                 sound.playClick();
                 setIsTutorialOpen(true);
               }}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-amber-300 hover:text-amber-200 transition-all flex items-center gap-1.5"
+              className="p-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-amber-300 hover:text-amber-200 transition-all"
               title="Ver Tutoriais e Dicas Passo a Passo"
             >
-              <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden md:inline">Tutoriais</span>
+              <HelpCircle className="w-4 h-4 text-amber-400" />
             </button>
 
             {/* Background Theme Selector Button */}
@@ -577,11 +598,10 @@ export default function App() {
                 sound.playClick();
                 setIsBgModalOpen(true);
               }}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-cyan-300 hover:text-cyan-200 transition-all flex items-center gap-1.5"
-              title="Trocar Plano de Fundo (Cosmos, Ciber-Grid, Aurora, CAD, Solar, Matriz)"
+              className="p-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-cyan-300 hover:text-cyan-200 transition-all"
+              title="Trocar Plano de Fundo"
             >
-              <Palette className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden md:inline">Fundo</span>
+              <Palette className="w-4 h-4 text-cyan-400" />
             </button>
 
             {/* Audio Toggle */}
@@ -602,124 +622,35 @@ export default function App() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 flex flex-col gap-4">
         {activeTab === 'sandbox' ? (
           <FreeSandboxMode />
         ) : (
           <>
-            {/* Sector & Phase Navigation Bar */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-lg backdrop-blur-sm flex flex-col gap-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-indigo-950/70 border border-indigo-700/50 text-indigo-400">
-                    <Layers className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-mono uppercase text-indigo-400 font-bold tracking-wider">
-                      {currentLevel.worldName}
-                    </span>
-                    <h2 className="text-base font-extrabold text-slate-100">
-                      Fase {currentLevel.id}: {currentLevel.title}
-                    </h2>
-                  </div>
-                </div>
-
-                {/* Quick Previous / Next Level Controls & Tutorial Button */}
-                <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-                  <button
-                    id="btn-level-tutorial"
-                    onClick={() => {
-                      sound.playClick();
-                      setIsTutorialOpen(true);
-                    }}
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-md shadow-amber-500/25 transition-all flex items-center gap-1.5 cursor-pointer"
-                    title={`Ver Tutorial e Guia Passo a Passo da Fase ${currentLevel.id}`}
-                  >
-                    <HelpCircle className="w-4 h-4 text-slate-950" />
-                    <span>Tutorial da Fase</span>
-                  </button>
-
-                  <div className="flex items-center gap-1 bg-slate-950/60 p-1 rounded-xl border border-slate-800">
-                    <button
-                      onClick={() => {
-                        if (currentLevelIndex > 0) {
-                          sound.playClick();
-                          setCurrentLevelIndex((prev) => prev - 1);
-                        }
-                      }}
-                      disabled={currentLevelIndex === 0}
-                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      title="Fase Anterior"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <span className="text-xs font-mono text-slate-400 px-1.5">
-                      {currentLevel.id} / {LEVELS.length}
-                    </span>
-                    <button
-                      onClick={() => {
-                        if (currentLevelIndex < LEVELS.length - 1) {
-                          sound.playClick();
-                          setCurrentLevelIndex((prev) => prev + 1);
-                        }
-                      }}
-                      disabled={currentLevelIndex === LEVELS.length - 1}
-                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      title="Próxima Fase"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stage Selector Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto w-full pb-1 pt-1 scrollbar-thin">
-                {LEVELS.map((lvl, idx) => {
-                  const isCurrent = idx === currentLevelIndex;
-                  const stars = levelStars[lvl.id] || 0;
-
-                  return (
-                    <button
-                      key={lvl.id}
-                      id={`select-level-${lvl.id}`}
-                      onClick={() => {
-                        sound.playClick();
-                        setCurrentLevelIndex(idx);
-                      }}
-                      className={`flex flex-col items-center justify-center min-w-[54px] py-1.5 px-2 rounded-xl border text-xs font-bold transition-all shrink-0 ${
-                        isCurrent
-                          ? 'bg-gradient-to-b from-indigo-600 to-indigo-700 border-indigo-400 text-white shadow-md shadow-indigo-900/50 scale-105'
-                          : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                      }`}
-                    >
-                      <span className="text-[10px] uppercase font-mono">Fase</span>
-                      <span className="text-xs font-extrabold">{lvl.id}</span>
-                      <div className="flex items-center gap-0.5 mt-0.5">
-                        {[1, 2, 3].map((s) => (
-                          <Star
-                            key={s}
-                            className={`w-2.5 h-2.5 ${
-                              s <= stars
-                                ? 'fill-amber-400 text-amber-400'
-                                : 'text-slate-700'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Structured Mission Selector Bar (Grouped by World in order) */}
+            <MissionSelectorBar
+              levels={LEVELS}
+              currentLevelIndex={currentLevelIndex}
+              currentLevel={currentLevel}
+              levelStars={levelStars}
+              onSelectLevel={(idx) => {
+                setCurrentLevelIndex(idx);
+              }}
+              onOpenRoadmap={() => {
+                setIsRoadmapOpen(true);
+              }}
+              onOpenTutorial={() => {
+                setIsTutorialOpen(true);
+              }}
+            />
 
             {/* Status Alert Banner */}
             <div
-              className={`px-4 py-2.5 rounded-xl border text-xs font-medium flex items-center justify-between gap-2 shadow-sm ${
+              className={`px-3.5 py-2 rounded-xl border text-xs font-medium flex items-center justify-between gap-2 shadow-sm transition-all ${
                 statusMessage.type === 'error'
-                  ? 'bg-rose-950/60 border-rose-600/70 text-rose-200'
+                  ? 'bg-rose-950/70 border-rose-600/70 text-rose-200'
                   : statusMessage.type === 'success'
-                  ? 'bg-emerald-950/60 border-emerald-500/70 text-emerald-200'
+                  ? 'bg-emerald-950/70 border-emerald-500/70 text-emerald-200'
                   : 'bg-slate-900/80 border-slate-800 text-slate-300'
               }`}
             >
@@ -744,29 +675,20 @@ export default function App() {
             </div>
 
             {/* Main Interactive Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-              {/* Left Column: Educational Skills (D12 & D19) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              {/* Left Column: Educational Skills (D12 & D19 organized in clean tabs) */}
               <div className="lg:col-span-5 flex flex-col gap-4">
-                {/* D12 Língua Portuguesa Card with key for auto-reset */}
-                <NarrativeCard
-                  key={`d12-${currentLevel.id}`}
+                <EducationalMissionPanel
+                  key={`edu-${currentLevel.id}`}
+                  levelId={currentLevel.id}
                   narrative={currentLevel.narrative}
                   d12={currentLevel.d12}
-                  onD12Resolved={(isCorrect) => handleD12Resolved(isCorrect)}
-                  isD12Resolved={Boolean(d12ResolvedMap[currentLevel.id])}
-                  onOpenTutorial={() => {
-                    sound.playClick();
-                    setIsTutorialOpen(true);
-                  }}
-                />
-
-                {/* D19 Matemática Card with key for auto-reset */}
-                <MathCalculatorPanel
-                  key={`d19-${currentLevel.id}`}
                   d19={currentLevel.d19}
                   currentEnergy={currentEnergy}
                   initialEnergy={currentLevel.initialEnergy}
                   targetEnergy={currentLevel.targetEnergy}
+                  isD12Resolved={Boolean(d12ResolvedMap[currentLevel.id])}
+                  onD12Resolved={(isCorrect) => handleD12Resolved(isCorrect)}
                   onOpenTutorial={() => {
                     sound.playClick();
                     setIsTutorialOpen(true);
@@ -807,6 +729,18 @@ export default function App() {
           </>
         )}
       </main>
+
+      {/* Missions Roadmap Modal (Full Ordered Journey) */}
+      <MissionsRoadmapModal
+        isOpen={isRoadmapOpen}
+        onClose={() => setIsRoadmapOpen(false)}
+        levels={LEVELS}
+        currentLevelId={currentLevel.id}
+        levelStars={levelStars}
+        onSelectLevel={(idx) => {
+          setCurrentLevelIndex(idx);
+        }}
+      />
 
       {/* Pedagogical Details Modal */}
       <PedagogicalModal
